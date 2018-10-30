@@ -1,0 +1,8 @@
+CACHE MANIFEST
+NETWORK:
+/ping.js
+/api/*
+CACHE:
+/index.html
+/todo
+/static/js/bundle.js

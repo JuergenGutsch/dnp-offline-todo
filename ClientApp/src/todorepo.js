@@ -1,19 +1,30 @@
 export class TodoRepository {
 
-    static LoadItems(callback) {
-        let data = OfflineRepository.LoadItems();
-        if (!data && data.length === 0) {
+    constructor(offlineRepository) {
+        this._offlineRepository = offlineRepository;
+    }
+
+    LoadItems(callback) {
+        let data = []
+        if (this._offlineRepository.isOnline) {
             fetch('api/todo')
                 .then(response => response.json())
                 .then(data => {
-                    OfflineRepository.AddItems(data);
+                    this._offlineRepository.AddItems(data);
                     callback(data)
+                })
+                .catch(err => {
+                    console.log(err);
+                    data = this._offlineRepository.LoadItems();
                 });
+        } else {
+            data = this._offlineRepository.LoadItems();
         }
+        return data;
     }
 
-    static UpdateItem(item, callback) {
-        OfflineRepository.UpdateItem(item);
+    UpdateItem(item, callback) {
+        this._offlineRepository.UpdateItem(item);
         fetch('api/todo/' + item.id, {
                 method: 'PUT',
                 contentType: 'application/json',
@@ -25,8 +36,8 @@ export class TodoRepository {
             });
     }
 
-    static CreateItem(item, callback) {
-        OfflineRepository.CreateItem(item);
+    CreateItem(item, callback) {
+        this._offlineRepository.CreateItem(item);
         fetch('api/todo', {
                 method: 'POST',
                 contentType: 'application/json',
@@ -34,13 +45,13 @@ export class TodoRepository {
             })
             .then(response => response.json())
             .then(() => {
-                callback(data);
+                callback();
             });
 
     }
 
-    static DeleteItem(callback) {
-        OfflineRepository.DeleteItem(item);
+    DeleteItem(item, callback) {
+        this._offlineRepository.DeleteItem(item);
         fetch('api/todo/' + item.id, {
                 method: 'DELETE'
             })

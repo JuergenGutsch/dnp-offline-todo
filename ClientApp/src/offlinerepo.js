@@ -1,14 +1,56 @@
 export class OfflineRepository {
 
-    static LoadItems() {
-        return [];
+    isOnline = false;
+    
+    constructor(){
+        // this.CheckState((state) => {
+        //     this.isOnline = state;
+        // });
     }
 
-    static AddItems(items) {
+    CheckState(callback) {
+        fetch("/ping.js")
+            .then(response => response.json())
+            .then((data) => {
+                this.isOnline = true;
+                callback(true);
+            })
+            .catch((err) => {
+                console.log(err);
+                this.isOnline = false;
+                callback(false);
+            })
 
+        window.setTimeout(() => {
+            this.CheckState(callback);
+        }, 1000)
     }
 
-    static UpdateItem(item) {
+
+    LoadItems() {
+        var storage = window.localStorage;
+        if (typeof(storage) === "undefined") {
+            alert("Your browser doesn't support offline storage.")
+        }
+
+        var todoItems = [];
+        var raw_todoItems = storage.todoItems;
+        if (raw_todoItems) {
+            todoItems = JSON.parse(raw_todoItems);
+        }
+        return todoItems;
+    }
+
+    AddItems(items) {
+        var storage = window.localStorage;
+        if (typeof(storage) === "undefined") {
+            alert("Your browser doesn't support offline storage.")
+        }
+
+        storage.todoItems = JSON.stringify(items);
+    }
+
+    UpdateItem(item) {
         let items = OfflineRepository.LoadItems();
         let existing = items.find(x => x.id === item.id);
         existing.name = item.name;
@@ -16,13 +58,13 @@ export class OfflineRepository {
         OfflineRepository.AddItems(items);
     }
 
-    static CreateItem(item) {
+    CreateItem(item) {
         let items = OfflineRepository.LoadItems();
         items.push(item);
-        OfflineRepository.AddItems(reduced);
+        OfflineRepository.AddItems(items);
     }
 
-    static DeleteItem(item) {
+    DeleteItem(item) {
         let items = OfflineRepository.LoadItems();
         let filtered = items.filter(x => x.id !== item.id);
         OfflineRepository.AddItems(filtered);

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { TodoRepository } from '../todorepo';
+import { OfflineRepository } from '../offlinerepo';
 
 export class Todo extends Component {
     displayName = Todo.name
@@ -7,14 +8,24 @@ export class Todo extends Component {
     constructor(props) {
         super(props);
 
+        this._offlineRepository = new OfflineRepository();
+        this._todoRepository = new TodoRepository(this._offlineRepository);
+
         this.state = { items: [], loading: true, newItem: '' };
 
-        TodoRepository.LoadItems((data) => {
+        this._todoRepository.LoadItems(data => {
             this.setState({ items: data, loading: false, newItem: '' });
         });
 
         this.handleChange = this.handleChange.bind(this);
+
+        this._offlineRepository.CheckState(this.checkOnlineState);
     }
+
+    checkOnlineState = (state) => {
+        console.log(state);
+        this.setState({ online: state });
+    };
 
     createCheckBox = (item) => (
         <li key={"li_" + item.id}>
@@ -61,6 +72,7 @@ export class Todo extends Component {
         return (
             <div>
                 <h1>TODO List</h1>
+                <h2>{this.state.online?'ONLINE':'OFFLINE'}</h2>
                 <p>This component demonstrates fetching data from the server.</p>
                 {this.newItemForm()}
                 {contents}
