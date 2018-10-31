@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GenFu;
+using Microsoft.AspNetCore.Mvc;
 using OfflineToDo.Models;
 
 namespace OfflineToDo.Repositories
@@ -18,8 +19,10 @@ namespace OfflineToDo.Repositories
     {
         public TodoRepository()
         {
+            var i = 1;
             GenFu.GenFu.Configure<TodoItem>()
-                .Fill(x => x.Id).WithinRange(1,100);
+                .Fill<int>(c => c.Id, () => { return i++; });
+
             Items = A.ListOf<TodoItem>(14);
         }
 
@@ -35,7 +38,7 @@ namespace OfflineToDo.Repositories
             return Items.FirstOrDefault(x => x.Id == id);
         }
 
-        public int AddItem(TodoItem item)
+        public int AddItem([FromBody]TodoItem item)
         {
             var newId = Items.Max(x => x.Id) + 1;
             item.Id = newId;
@@ -43,7 +46,7 @@ namespace OfflineToDo.Repositories
             return newId;
         }
 
-        public void UpdateItem(int id, TodoItem item)
+        public void UpdateItem(int id, [FromBody]TodoItem item)
         {
             var existing = Items.FirstOrDefault(x => x.Id == id);
             existing.Name = item.Name;

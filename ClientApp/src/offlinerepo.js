@@ -1,5 +1,5 @@
 export class OfflineRepository {
-    
+
     constructor() {
         this.CanSync(() => {
             this.Sync();
@@ -37,6 +37,10 @@ export class OfflineRepository {
                 this._isOnline = false;
                 callback(false);
             });
+    }
+
+    Sync() {
+
     }
 
     LoadItems() {

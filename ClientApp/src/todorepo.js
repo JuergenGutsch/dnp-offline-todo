@@ -30,11 +30,10 @@ export class TodoRepository {
             if (isOnline) {
                 fetch('api/todo/' + item.id, {
                         method: 'PUT',
-                        contentType: 'application/json',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(item)
                     })
-                    .then(response => response.json())
-                    .then(data => {
+                    .then(() => {
                         callback();
                     })
                     .catch(err => {
@@ -52,11 +51,10 @@ export class TodoRepository {
             if (isOnline) {
                 fetch('api/todo', {
                         method: 'POST',
-                        contentType: 'application/json',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(item)
                     })
-                    .then(response => response.json())
-                    .then(data => {
+                    .then(() => {
                         callback();
                     })
                     .catch(err => {
@@ -75,8 +73,7 @@ export class TodoRepository {
                 fetch('api/todo/' + item.id, {
                         method: 'DELETE'
                     })
-                    .then(response => response.json())
-                    .then(data => {
+                    .then(() => {
                         callback();
                     })
                     .catch(err => {

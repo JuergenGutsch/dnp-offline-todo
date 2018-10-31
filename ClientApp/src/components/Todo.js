@@ -34,16 +34,30 @@ export class Todo extends Component {
     };
 
     createCheckBox = (item) => (
-        <li key={"li_" + item.id}>
+        <li key={ "li_" + item.id } className="list-group-item">
             <label>
-                <input key={"cb_" + item.id} 
+                <input key={ "cb_" + item.id } 
                     type="checkbox" 
-                    defaultChecked={item.isDone} 
-                    onChange={(event) => this.handleCheckBoxChange(event, item.id, item.name)} />&nbsp;
-                <span>{item.name}</span>                
+                    defaultChecked={ item.isDone } 
+                    onChange={ (event) => this.handleCheckBoxChange(event, item.id, item.name) } />
+                <span>&nbsp;{ item.name }&nbsp;</span>
             </label>
+            <span className="badge">
+                <span className="glyphicon glyphicon-remove" style={{cursor:'pointer'}} onClick={ (event) => this.handleDeleteItem(item.id) }></span>
+            </span>
         </li>
     );
+
+    handleDeleteItem = (id) => {
+        if(!window.confirm("Really delete this item?")) return;
+        this._todoRepository.DeleteItem({
+            id: id
+        }, () =>{
+            this._todoRepository.LoadItems(data => {
+                this.setState({ items: data });
+            });
+        });
+    }
 
     handleCheckBoxChange = (event, id, name) => {
         let isDone = event.target.checked;
@@ -52,11 +66,11 @@ export class Todo extends Component {
             id: id,
             name: name,
             isDone: isDone
-        },() =>{
+        }, () =>{
             this._todoRepository.LoadItems(data => {
                 this.setState({ items: data });
             });
-        })
+        });
     }
 
     createCheckBoxes = (items) => (
@@ -66,15 +80,15 @@ export class Todo extends Component {
     );
 
     renderTodoItems = (items) => (
-        <ul>
+        <ul className="list-group">
             {this.createCheckBoxes(items)}
         </ul>
     )
 
     newItemForm = () => (
         <p>
-            <input type="text" value={ this.state.newItem } onChange={this.handleAddChange} />
-            <input type="button" value="Add" onClick={this.handleAddClick} />
+            <input type="text" value={ this.state.newItem } onChange={ this.handleAddChange } />
+            <input type="button" value="Add" onClick={ this.handleAddClick } />
         </p>
     );
 

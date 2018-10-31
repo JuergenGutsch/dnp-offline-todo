@@ -23,12 +23,18 @@ namespace OfflineToDo.Controllers
             return _todoRepository.AllItems().ToList();
         }
 
+        [HttpGet("{id}")]
+        public ActionResult<TodoItem> Get(int id)
+        {
+            return _todoRepository.AllItems().First(x => x.Id == id);
+        }
+
         [HttpPost()]
         public IActionResult Post(TodoItem item)
         {
-            var id = _todoRepository.AddItem(item);
+            _todoRepository.AddItem(item);
 
-            return CreatedAtRoute("Get", new { id = id }, item);
+            return NoContent();
         }
 
         [HttpPut("{id}")]
