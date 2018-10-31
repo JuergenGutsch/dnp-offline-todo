@@ -17,14 +17,20 @@ export class Todo extends Component {
             this.setState({ items: data, loading: false, newItem: '' });
         });
 
-        this.handleChange = this.handleChange.bind(this);
+        this.handleCheckBoxChange = this.handleCheckBoxChange.bind(this);
 
-        this._offlineRepository.CheckState(this.checkOnlineState);
+        this.checkOnlineState();
     }
 
-    checkOnlineState = (state) => {
-        console.log(state);
-        this.setState({ online: state });
+    checkOnlineState = () => {        
+        this._offlineRepository.CheckState(state => {
+            console.log(state);
+            this.setState({ online: state });
+        });
+
+        window.setTimeout(() => {
+            this.checkOnlineState();
+        }, 5000);
     };
 
     createCheckBox = (item) => (
@@ -33,11 +39,25 @@ export class Todo extends Component {
                 <input key={"cb_" + item.id} 
                     type="checkbox" 
                     defaultChecked={item.isDone} 
-                    onChange={this.handleChange} />&nbsp;
-                <span>{item.name}</span>
+                    onChange={(event) => this.handleCheckBoxChange(event, item.id, item.name)} />&nbsp;
+                <span>{item.name}</span>                
             </label>
         </li>
     );
+
+    handleCheckBoxChange = (event, id, name) => {
+        let isDone = event.target.checked;
+        console.info(name + " {" + id + "} {" + isDone + "}");
+        this._todoRepository.UpdateItem({
+            id: id,
+            name: name,
+            isDone: isDone
+        },() =>{
+            this._todoRepository.LoadItems(data => {
+                this.setState({ items: data });
+            });
+        })
+    }
 
     createCheckBoxes = (items) => (
         items.map(item =>
@@ -53,29 +73,44 @@ export class Todo extends Component {
 
     newItemForm = () => (
         <p>
-            <input type="text" value={ this.state.newItem } />
-            <input type="button" value="Add" />
+            <input type="text" value={ this.state.newItem } onChange={this.handleAddChange} />
+            <input type="button" value="Add" onClick={this.handleAddClick} />
         </p>
     );
 
-    handleChange = (event) => {
-        let checked = !event.target.checked;
-        let id = event.target.id;
-        console.info("{" + id + "} {" + checked + "}");
-    }
+    handleAddChange = (event) => {
+        this.setState({ newItem: event.target.value });
+    };
+
+    handleAddClick = (event) => {
+        var name = this.state.newItem;
+        this._todoRepository.CreateItem({
+            id: -1,
+            name: name,
+            isDone: false
+        }, () => {
+            this._todoRepository.LoadItems(data => {
+                this.setState({ items: data });
+            });
+        });
+    };
 
     render() {
         let contents = this.state.loading
             ? <p><em>Loading...</em></p>
             : this.renderTodoItems(this.state.items);
 
+        let online = this.state.online
+            ? <span className="label label-success">ONLINE</span>
+            : <span className="label label-danger">OFFLINE</span>;
+
         return (
             <div>
                 <h1>TODO List</h1>
-                <h2>{this.state.online?'ONLINE':'OFFLINE'}</h2>
+                <h2>{ online }</h2>
                 <p>This component demonstrates fetching data from the server.</p>
-                {this.newItemForm()}
-                {contents}
+                { this.newItemForm() }
+                { contents }
             </div>
         );
     }

@@ -1,31 +1,43 @@
 export class OfflineRepository {
-
-    isOnline = false;
     
-    constructor(){
-        // this.CheckState((state) => {
-        //     this.isOnline = state;
-        // });
+    constructor() {
+        this.CanSync(() => {
+            this.Sync();
+        })
+    }
+
+    CanSync(callback) {
+        this.CheckState(online => {
+            if (online) {
+                callback();
+            }
+        });
+
+        window.setTimeout(() => {
+            this.CanSync(callback);
+        }, 5000);
+    }
+
+    IsOnline(callback) {
+        this.CheckState((state) => {
+            this._isOnline = state;
+            callback(state);
+        });
     }
 
     CheckState(callback) {
         fetch("/ping.js")
             .then(response => response.json())
             .then((data) => {
-                this.isOnline = true;
+                this._isOnline = true;
                 callback(true);
             })
             .catch((err) => {
                 console.log(err);
-                this.isOnline = false;
+                this._isOnline = false;
                 callback(false);
-            })
-
-        window.setTimeout(() => {
-            this.CheckState(callback);
-        }, 1000)
+            });
     }
-
 
     LoadItems() {
         var storage = window.localStorage;

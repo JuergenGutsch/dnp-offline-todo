@@ -18,6 +18,8 @@ namespace OfflineToDo.Repositories
     {
         public TodoRepository()
         {
+            GenFu.GenFu.Configure<TodoItem>()
+                .Fill(x => x.Id).WithinRange(1,100);
             Items = A.ListOf<TodoItem>(14);
         }
 
