@@ -50,5 +50,11 @@ namespace OfflineToDo.Controllers
             _todoRepository.DeleteItem(id);
             return NoContent();
         }
+
+        [HttpGet("ping")]
+        public ActionResult<object> Ping()
+        {
+            return new { Success = true };
+        }
     }
 }

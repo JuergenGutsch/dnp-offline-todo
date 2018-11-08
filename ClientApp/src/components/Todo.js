@@ -43,7 +43,9 @@ export class Todo extends Component {
                 <span>&nbsp;{ item.name }&nbsp;</span>
             </label>
             <span className="badge">
-                <span className="glyphicon glyphicon-remove" style={{cursor:'pointer'}} onClick={ (event) => this.handleDeleteItem(item.id) }></span>
+                <span className="glyphicon glyphicon-remove" 
+                    style={{cursor:'pointer'}} 
+                    onClick={ (event) => this.handleDeleteItem(item.id) }></span>
             </span>
         </li>
     );

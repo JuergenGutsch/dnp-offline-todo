@@ -1,52 +1,54 @@
 export class OfflineRepository {
 
-    constructor() {
-        this.CanSync(() => {
-            this.Sync();
-        })
-    }
+    isDirty = false;
 
-    CanSync(callback) {
-        this.CheckState(online => {
-            if (online) {
-                callback();
+    IsOnline(trueCallback, falseCallback) {
+        this.CheckState(isOnline => {
+            if (isOnline) {
+                trueCallback(isOnline);
+                if (this.isDirty) {
+                    this.Sync();
+                }
+            } else {
+                falseCallback();
             }
-        });
-
-        window.setTimeout(() => {
-            this.CanSync(callback);
-        }, 5000);
-    }
-
-    IsOnline(callback) {
-        this.CheckState((state) => {
-            this._isOnline = state;
-            callback(state);
         });
     }
 
     CheckState(callback) {
-        fetch("/ping.js")
+        fetch('/api/todo/ping')
             .then(response => response.json())
-            .then((data) => {
-                this._isOnline = true;
+            .then(data => {
                 callback(true);
             })
-            .catch((err) => {
+            .catch(err => {
                 console.log(err);
-                this._isOnline = false;
                 callback(false);
             });
     }
 
     Sync() {
-
+        var items = this.LoadItems();
+        fetch('', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(items)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Sync done: ' + data);
+            })
+            .catch(err => {
+                console.log('Sync failed: ' + err);
+            });
+        this.isDirty = false;
     }
 
     LoadItems() {
         var storage = window.localStorage;
-        if (typeof(storage) === "undefined") {
-            alert("Your browser doesn't support offline storage.")
+        if (typeof(storage) === 'undefined') {
+            alert('Your browser doesn\'t support offline storage.');
+            return;
         }
 
         var todoItems = [];
@@ -59,11 +61,13 @@ export class OfflineRepository {
 
     AddItems(items) {
         var storage = window.localStorage;
-        if (typeof(storage) === "undefined") {
-            alert("Your browser doesn't support offline storage.")
+        if (typeof(storage) === 'undefined') {
+            alert('Your browser doesn\'t support offline storage.');
+            return;
         }
 
         storage.todoItems = JSON.stringify(items);
+        this.isDirty = true;
     }
 
     UpdateItem(item) {

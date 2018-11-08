@@ -5,8 +5,16 @@ export class TodoRepository {
     }
 
     LoadItems(callback) {
-        this._offlineRepository.IsOnline(isOnline => {
-            if (isOnline) {
+        let handleOfflineOrErr = err => {
+            if (err) {
+                console.log(err);
+            }
+            let data = this._offlineRepository.LoadItems();
+            callback(data);
+        };
+
+        this._offlineRepository.IsOnline(
+            () => { // online callback
                 fetch('api/todo')
                     .then(response => response.json())
                     .then(data => {
@@ -14,20 +22,53 @@ export class TodoRepository {
                         callback(data)
                     })
                     .catch(err => {
-                        console.log(err);
-                        let data = this._offlineRepository.LoadItems();
-                        callback(data)
+                        handleOfflineOrErr(err);
                     });
-            } else {
-                let data = this._offlineRepository.LoadItems();
-                callback(data)
+            },
+            err => { // error or offline callback
+                handleOfflineOrErr(err);
             }
-        });
+        );
+    }
+
+
+    AddItem(item, callback) {
+        let handleOfflineOrErr = err => {
+            if (err) {
+                console.log(err);
+            }
+            this._offlineRepository.AddItem(item);
+            callback();
+        };
+
+        this._offlineRepository.IsOnline(
+            () => { // online callback
+                fetch('api/todo')
+                    .then(() => {
+                        this._offlineRepository.AddItem(item);
+                        callback()
+                    })
+                    .catch(err => {
+                        handleOfflineOrErr(err);
+                    });
+            },
+            err => { // error or offline callback
+                handleOfflineOrErr(err);
+            }
+        );
     }
 
     UpdateItem(item, callback) {
-        this._offlineRepository.IsOnline(isOnline => {
-            if (isOnline) {
+        let handleOfflineOrErr = err => {
+            if (err) {
+                console.log(err);
+            }
+            this._offlineRepository.UpdateItem(item);
+            callback();
+        };
+
+        this._offlineRepository.IsOnline(
+            () => { // online callback
                 fetch('api/todo/' + item.id, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -37,18 +78,25 @@ export class TodoRepository {
                         callback();
                     })
                     .catch(err => {
-                        console.log(err);
-                        this._offlineRepository.UpdateItem(item);
+                        handleOfflineOrErr(err);
                     });
-            } else {
-                this._offlineRepository.UpdateItem(item);
-            }
-        });
+            },
+            err => { // error or offline callback
+                handleOfflineOrErr(err);
+            });
     }
 
     CreateItem(item, callback) {
-        this._offlineRepository.IsOnline(isOnline => {
-            if (isOnline) {
+        let handleOfflineOrErr = err => {
+            if (err) {
+                console.log(err);
+            }
+            this._offlineRepository.CreateItem(item);
+            callback();
+        };
+
+        this._offlineRepository.IsOnline(
+            () => { // online callback
                 fetch('api/todo', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -58,18 +106,25 @@ export class TodoRepository {
                         callback();
                     })
                     .catch(err => {
-                        console.log(err);
-                        this._offlineRepository.CreateItem(item);
+                        handleOfflineOrErr(err);
                     });
-            } else {
-                this._offlineRepository.CreateItem(item);
-            }
-        });
+            },
+            err => { // error or offline callback
+                handleOfflineOrErr(err);
+            });
     }
 
     DeleteItem(item, callback) {
-        this._offlineRepository.IsOnline(isOnline => {
-            if (isOnline) {
+        let handleOfflineOrErr = err => {
+            if (err) {
+                console.log(err);
+            }
+            this._offlineRepository.CreateItem(item);
+            callback();
+        };
+
+        this._offlineRepository.IsOnline(
+            () => {
                 fetch('api/todo/' + item.id, {
                         method: 'DELETE'
                     })
@@ -77,12 +132,11 @@ export class TodoRepository {
                         callback();
                     })
                     .catch(err => {
-                        console.log(err);
-                        this._offlineRepository.DeleteItem(item);
+                        handleOfflineOrErr(err);
                     });
-            } else {
-                this._offlineRepository.DeleteItem(item);
-            }
-        });
+            },
+            err => {
+                handleOfflineOrErr(err);
+            });
     }
 }
