@@ -18,6 +18,7 @@ export class Todo extends Component {
         });
 
         this.handleCheckBoxChange = this.handleCheckBoxChange.bind(this);
+        this.handleAddChange = this.handleAddChange.bind(this);
 
         this.checkOnlineState();
     }
@@ -40,7 +41,7 @@ export class Todo extends Component {
                     type="checkbox" 
                     defaultChecked={ item.isDone } 
                     onChange={ (event) => this.handleCheckBoxChange(event, item.id, item.name) } />
-                <span>&nbsp;{ item.name }&nbsp;</span>
+                <span>&nbsp;{ item.name }</span>
             </label>
             <span className="badge">
                 <span className="glyphicon glyphicon-remove" 
@@ -67,7 +68,8 @@ export class Todo extends Component {
         this._todoRepository.UpdateItem({
             id: id,
             name: name,
-            isDone: isDone
+            isDone: isDone,
+            updateDate: new Date()
         }, () =>{
             this._todoRepository.LoadItems(data => {
                 this.setState({ items: data });
@@ -103,7 +105,9 @@ export class Todo extends Component {
         this._todoRepository.CreateItem({
             id: -1,
             name: name,
-            isDone: false
+            isDone: false,
+            createDate: new Date(),
+            updateDate: new Date()
         }, () => {
             this._todoRepository.LoadItems(data => {
                 this.setState({ items: data });

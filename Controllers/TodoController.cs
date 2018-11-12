@@ -37,6 +37,15 @@ namespace OfflineToDo.Controllers
             return NoContent();
         }
 
+
+        [HttpPost("sync")]
+        public IActionResult PostSync(IEnumerable<TodoItem> items)
+        {
+            _todoRepository.SyncItems(items);
+
+            return NoContent();
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, TodoItem item)
         {

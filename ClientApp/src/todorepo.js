@@ -7,7 +7,7 @@ export class TodoRepository {
     LoadItems(callback) {
         let handleOfflineOrErr = err => {
             if (err) {
-                console.log(err);
+                console.error(err);
             }
             let data = this._offlineRepository.LoadItems();
             callback(data);
@@ -20,33 +20,6 @@ export class TodoRepository {
                     .then(data => {
                         this._offlineRepository.AddItems(data);
                         callback(data)
-                    })
-                    .catch(err => {
-                        handleOfflineOrErr(err);
-                    });
-            },
-            err => { // error or offline callback
-                handleOfflineOrErr(err);
-            }
-        );
-    }
-
-
-    AddItem(item, callback) {
-        let handleOfflineOrErr = err => {
-            if (err) {
-                console.log(err);
-            }
-            this._offlineRepository.AddItem(item);
-            callback();
-        };
-
-        this._offlineRepository.IsOnline(
-            () => { // online callback
-                fetch('api/todo')
-                    .then(() => {
-                        this._offlineRepository.AddItem(item);
-                        callback()
                     })
                     .catch(err => {
                         handleOfflineOrErr(err);

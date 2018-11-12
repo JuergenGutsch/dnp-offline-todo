@@ -29,7 +29,7 @@ export class OfflineRepository {
 
     Sync() {
         var items = this.LoadItems();
-        fetch('', {
+        fetch('api/todo/sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(items)
@@ -37,11 +37,11 @@ export class OfflineRepository {
             .then(response => response.json())
             .then(data => {
                 console.log('Sync done: ' + data);
+                this.isDirty = false;
             })
             .catch(err => {
                 console.log('Sync failed: ' + err);
             });
-        this.isDirty = false;
     }
 
     LoadItems() {
@@ -71,22 +71,22 @@ export class OfflineRepository {
     }
 
     UpdateItem(item) {
-        let items = OfflineRepository.LoadItems();
+        let items = this.LoadItems();
         let existing = items.find(x => x.id === item.id);
         existing.name = item.name;
         existing.isDone = item.isDone;
-        OfflineRepository.AddItems(items);
+        this.AddItems(items);
     }
 
     CreateItem(item) {
-        let items = OfflineRepository.LoadItems();
+        let items = this.LoadItems();
         items.push(item);
-        OfflineRepository.AddItems(items);
+        this.AddItems(items);
     }
 
     DeleteItem(item) {
-        let items = OfflineRepository.LoadItems();
+        let items = this.LoadItems();
         let filtered = items.filter(x => x.id !== item.id);
-        OfflineRepository.AddItems(filtered);
+        this.AddItems(filtered);
     }
 }
